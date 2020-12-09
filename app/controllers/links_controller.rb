@@ -3,7 +3,11 @@ class LinksController < ApplicationController
     creator = LinkCreator.new(params[:url])
     link = creator.call
 
-    render json: { slug: link.slug }, status: 201
+    if link
+      render json: { slug: link.slug }, status: 201
+    else
+      render json: { error: 'URL is invalid' }, status: 422
+    end
   end
 
   def show

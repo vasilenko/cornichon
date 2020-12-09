@@ -28,5 +28,17 @@ RSpec.describe LinkCreator, type: :service do
         is_expected.to eq link
       end
     end
+
+    context 'when given url is invalid' do
+      let(:url) { 'ftp://localhost' }
+
+      it 'does not create any link' do
+        expect { subject }.not_to change { Link.count }
+      end
+
+      it 'returns nil' do
+        is_expected.to be_nil
+      end
+    end
   end
 end

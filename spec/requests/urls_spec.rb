@@ -5,11 +5,22 @@ RSpec.describe 'Urls API', type: :request do
   let(:url) { 'http://localhost' }
 
   describe 'POST /urls' do
-    it 'responds with slug for given url' do
-      post '/urls', params: { url: url }
+    before { post '/urls', params: { url: url } }
 
-      expect(response).to be_created
-      expect(response_body[:slug]).to be
+    context 'when given url is valid' do
+      it 'responds with slug for given url' do
+        expect(response).to be_created
+        expect(response_body[:slug]).to be
+      end
+    end
+
+    context 'when given url is not valid' do
+      let(:url) { 'ftp://localhost' }
+
+      it 'responds with 422 Unprocessable Entity' do
+        expect(response).to have_http_status 422
+        expect(response_body[:error]).to be
+      end
     end
   end
 

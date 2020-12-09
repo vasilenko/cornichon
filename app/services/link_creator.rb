@@ -12,6 +12,12 @@ class LinkCreator
   end
 
   def call
+    create_link if url_valid?
+  end
+
+  private
+
+  def create_link
     retry_count ||= 0
 
     Link.insert(insert_attributes, returning: [], unique_by: :url)
@@ -22,8 +28,6 @@ class LinkCreator
     raise Error, 'Unable to insert link with generated slug'
   end
 
-  private
-
   def insert_attributes
     {
       url: @url,
@@ -33,5 +37,12 @@ class LinkCreator
 
   def slug
     rand(36**SLUG_LENGTH).to_s(36)
+  end
+
+  def url_valid?
+    uri = URI.parse(@url)
+    uri.is_a?(URI::HTTP) && !uri.host.nil?
+  rescue URI::InvalidURIError
+    false
   end
 end
