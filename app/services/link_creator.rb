@@ -1,4 +1,6 @@
 class LinkCreator
+  Error = Class.new(StandardError)
+
   SLUG_LENGTH = 6
   SLUG_RETRY_LIMIT = 100
 
@@ -11,17 +13,16 @@ class LinkCreator
 
   def call
     retry_count ||= 0
-    insert_link
+
+    Link.insert(insert_attributes, returning: [], unique_by: :url)
+    Link.find_by(url: @url)
   rescue ActiveRecord::RecordNotUnique
     retry if (retry_count += 1) < SLUG_RETRY_LIMIT
+
+    raise Error, 'Unable to insert link with generated slug'
   end
 
   private
-
-  def insert_link
-    result, = Link.insert(insert_attributes, returning: %w[slug], unique_by: :url)
-    result ? result['slug'] : Link.find_by(url: @url).slug
-  end
 
   def insert_attributes
     {
